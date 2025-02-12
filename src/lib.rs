@@ -39,18 +39,7 @@ pub unsafe fn enable() {
 		hook_fmt! { 1, i8, i16, i32, i64, i128 };
 		hook_fmt! { 1, f32, f64 };
 		hook_fmt! { 1, bool };
-		hook_fmt! { 2, char };
-
-		hook! {
-			hook: for<'b, 'c> fn(&str, &'b mut Formatter<'c>) -> Result,
-			<str as Debug>::fmt,
-			|this, fmt| {
-				color(fmt, 2)?;
-				unsafe { hook(this, fmt)? };
-				uncolor(fmt)?;
-				Ok(())
-			}
-		}
+		hook_fmt! { 2, char, str };
 
 		hook! {
 			hook: for<'a> fn(&'a mut std::fmt::DebugStruct<'static, 'static>, &str, &dyn Debug) -> &'a mut std::fmt::DebugStruct<'static, 'static>,
