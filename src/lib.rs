@@ -77,8 +77,8 @@ unsafe fn structs() {
 	}
 
 	hook! {
-		hook: for<'b> fn(&'b mut std::fmt::Formatter<'static>, &str) -> std::fmt::DebugStruct<'b, 'static>,
-		std::fmt::Formatter::debug_struct,
+		hook: for<'b> fn(&'b mut Formatter<'static>, &str) -> std::fmt::DebugStruct<'b, 'static>,
+		Formatter::debug_struct,
 		|fmt, name| unsafe { hook(fmt, &colored(name, 4)) }
 	};
 
@@ -101,8 +101,8 @@ unsafe fn tuples() {
 	}
 
 	hook! {
-		hook: for<'b> fn(&'b mut std::fmt::Formatter<'static>, &str) -> std::fmt::DebugTuple<'b, 'static>,
-		std::fmt::Formatter::debug_tuple,
+		hook: for<'b> fn(&'b mut Formatter<'static>, &str) -> std::fmt::DebugTuple<'b, 'static>,
+		Formatter::debug_tuple,
 		|fmt, name| unsafe { hook(fmt, &colored(name, 4)) }
 	};
 
