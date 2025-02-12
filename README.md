@@ -14,3 +14,4 @@ This is of course very hacky, so anything may break in the future. Known limitat
 - Derived unit structs/variants are not colorized, as they are just a write_str call.
 - Field names are not colored when using nightly-only `field_with`.
 - References to integer types are only colorized up to a certain depth, due to inlining.
+  - Inlining can also cause issues when calling `x.fmt(f)` directly, if `x` is an integer type.
