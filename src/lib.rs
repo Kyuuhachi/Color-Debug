@@ -63,18 +63,14 @@ unsafe fn structs() {
 	hook! {
 		hook: for<'b> fn(&'b mut std::fmt::Formatter<'static>, &str) -> std::fmt::DebugStruct<'b, 'static>,
 		std::fmt::Formatter::debug_struct,
-		|fmt, name| {
-			unsafe { hook(fmt, &colored(name, 4)) }
-		}
+		|fmt, name| unsafe { hook(fmt, &colored(name, 4)) }
 	};
 
 	// Something fishy with variance I think, which prevents me from coloring fields
 	hook! {
 		hook: for<'a> fn(&'a mut std::fmt::DebugStruct<'static, 'static>, &str, &dyn Debug) -> &'a mut std::fmt::DebugStruct<'static, 'static>,
 		std::fmt::DebugStruct::field,
-		|fmt, name, val| {
-			unsafe { hook(fmt, &colored(name, 5), val) }
-		}
+		|fmt, name, val| unsafe { hook(fmt, &colored(name, 5), val) }
 	};
 
 	macro_rules! hook_struct {
@@ -82,9 +78,7 @@ unsafe fn structs() {
 			hook! {
 				func: fn(&mut Formatter<'static>, &str $(, $a: &str, $b: &dyn Debug)*) -> Result,
 				Formatter::$name,
-				|fmt, name $(, $a, $b)*| {
-					unsafe { func(fmt, &colored(name, 4) $(, $a, $b)*) }
-				}
+				|fmt, name $(, $a, $b)*| unsafe { func(fmt, &colored(name, 4) $(, $a, $b)*) }
 			}
 		}
 	}
@@ -102,13 +96,7 @@ unsafe fn tuples() {
 			hook! {
 				func: fn(&mut Formatter<'static>, &str $(, $a: &dyn Debug)*) -> Result,
 				Formatter::$name,
-				|fmt, name $(, $a)*| {
-					unsafe { func(
-						fmt,
-						&colored(name, 4)
-						$(, $a)*
-					) }
-				}
+				|fmt, name $(, $a)*| unsafe { func(fmt, &colored(name, 4) $(, $a)*) }
 			}
 		}
 	}
@@ -116,9 +104,7 @@ unsafe fn tuples() {
 	hook! {
 		hook: for<'b> fn(&'b mut std::fmt::Formatter<'static>, &str) -> std::fmt::DebugTuple<'b, 'static>,
 		std::fmt::Formatter::debug_tuple,
-		|fmt, name| {
-			unsafe { hook(fmt, &colored(name, 4)) }
-		}
+		|fmt, name| unsafe { hook(fmt, &colored(name, 4)) }
 	};
 
 	hook_tuple!(debug_tuple_field1_finish, v1);
