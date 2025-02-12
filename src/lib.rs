@@ -1,4 +1,4 @@
-#![feature(fmt_helpers_for_derive)]
+#![cfg_attr(feature = "nightly", feature(fmt_helpers_for_derive))]
 
 use std::fmt::{Formatter, Result, Debug};
 
@@ -58,11 +58,14 @@ pub unsafe fn enable() {
 
 		// Coloring struct/tuple names can only be reliably done on nightly, since derived impls have shorthand functions.
 		// Unit variants unfortunately use write_str, which I can't hook.
+		#[cfg(feature = "nightly")]
 		structs();
+		#[cfg(feature = "nightly")]
 		tuples();
 	}
 }
 
+#[cfg(feature = "nightly")]
 unsafe fn structs() {
 	macro_rules! hook_struct {
 		($name:ident $(,$a:ident $b:ident)*) => {
@@ -93,6 +96,7 @@ unsafe fn structs() {
 	};
 }
 
+#[cfg(feature = "nightly")]
 unsafe fn tuples() {
 	macro_rules! hook_tuple {
 		($name:ident $(,$a:ident)*) => {
