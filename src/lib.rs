@@ -69,15 +69,13 @@ unsafe fn structs() {
 	};
 
 	// Something fishy with variance I think, which prevents me from coloring fields
-	// hook! {
-	// 	hook: for<'a> fn(&'a mut std::fmt::DebugStruct<'static, 'static>, &str, &dyn Debug) -> &'a mut std::fmt::DebugTuple<'static, 'static>,
-	// 	std::fmt::DebugStruct::field,
-	// 	|fmt, name, val| {
-	// 		unsafe { hook(fmt, &colored(name, 5), val) }
-	// 	}
-	// };
-
-	// Can't do field_with since it's generic
+	hook! {
+		hook: for<'a> fn(&'a mut std::fmt::DebugStruct<'static, 'static>, &str, &dyn Debug) -> &'a mut std::fmt::DebugStruct<'static, 'static>,
+		std::fmt::DebugStruct::field,
+		|fmt, name, val| {
+			unsafe { hook(fmt, &colored(name, 5), val) }
+		}
+	};
 
 	macro_rules! hook_struct {
 		($name:ident $(,$a:ident $b:ident)*) => {
@@ -85,17 +83,11 @@ unsafe fn structs() {
 				func: fn(&mut Formatter<'static>, &str $(, $a: &str, $b: &dyn Debug)*) -> Result,
 				Formatter::$name,
 				|fmt, name $(, $a, $b)*| {
-					unsafe { func(
-						fmt,
-						&colored(name, 4)
-						// $(, &colored($a, 5), $b)*
-						$(, $a, $b)*
-					) }
+					unsafe { func(fmt, &colored(name, 4) $(, $a, $b)*) }
 				}
 			}
 		}
 	}
-
 
 	hook_struct!(debug_struct_field1_finish, n1 v1);
 	hook_struct!(debug_struct_field2_finish, n1 v1, n2 v2);
