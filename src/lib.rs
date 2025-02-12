@@ -66,12 +66,6 @@ pub unsafe fn enable() {
 }
 
 unsafe fn structs() {
-	hook! {
-		hook: for<'b> fn(&'b mut std::fmt::Formatter<'static>, &str) -> std::fmt::DebugStruct<'b, 'static>,
-		std::fmt::Formatter::debug_struct,
-		|fmt, name| unsafe { hook(fmt, &colored(name, 4)) }
-	};
-
 	macro_rules! hook_struct {
 		($name:ident $(,$a:ident $b:ident)*) => {
 			hook! {
@@ -81,6 +75,12 @@ unsafe fn structs() {
 			}
 		}
 	}
+
+	hook! {
+		hook: for<'b> fn(&'b mut std::fmt::Formatter<'static>, &str) -> std::fmt::DebugStruct<'b, 'static>,
+		std::fmt::Formatter::debug_struct,
+		|fmt, name| unsafe { hook(fmt, &colored(name, 4)) }
+	};
 
 	hook_struct!(debug_struct_field1_finish, n1 v1);
 	hook_struct!(debug_struct_field2_finish, n1 v1, n2 v2);
