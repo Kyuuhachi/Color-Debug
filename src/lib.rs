@@ -31,39 +31,6 @@ macro_rules! hook_fmt {
 	}
 }
 
-macro_rules! hook_struct {
-	($name:ident $(,$a:ident $b:ident)*) => {
-		hook! {
-			func: fn(&mut Formatter<'static>, &str $(, $a: &str, $b: &dyn Debug)*) -> Result,
-			Formatter::$name,
-			|fmt, name $(, $a, $b)*| {
-				unsafe { func(
-					fmt,
-					&colored(name, 4)
-					$(, &colored($a, 5), $b)*
-				) }
-			}
-		}
-	}
-}
-
-macro_rules! hook_tuple {
-	($name:ident $(,$a:ident)*) => {
-		hook! {
-			func: fn(&mut Formatter<'static>, &str $(, $a: &dyn Debug)*) -> Result,
-			Formatter::$name,
-			|fmt, name $(, $a)*| {
-				unsafe { func(
-					fmt,
-					&colored(name, 4)
-					$(, $a)*
-				) }
-			}
-		}
-	}
-}
-
-
 /// # Safety
 /// Must only be called once, probably. Really, not sure.
 pub unsafe fn enable() {
@@ -85,27 +52,88 @@ pub unsafe fn enable() {
 			}
 		}
 
-		hook! {
-			hook: for<'b> fn(&'b mut std::fmt::Formatter<'static>, &str) -> std::fmt::DebugTuple<'b, 'static>,
-			std::fmt::Formatter::debug_tuple,
-			|fmt, name| {
-				unsafe { hook(fmt, &colored(name, 4)) }
-			}
-		};
+		// Unit variants unfortunately use write_str, which I can't hook
 
-		hook_struct!(debug_struct_field1_finish, n1 v1);
-		hook_struct!(debug_struct_field2_finish, n1 v1, n2 v2);
-		hook_struct!(debug_struct_field3_finish, n1 v1, n2 v2, n3 v3);
-		hook_struct!(debug_struct_field4_finish, n1 v1, n2 v2, n3 v3, n4 v4);
-		hook_struct!(debug_struct_field5_finish, n1 v1, n2 v2, n3 v3, n4 v4, n5 v5);
-
-		hook_tuple!(debug_tuple_field1_finish, v1);
-		hook_tuple!(debug_tuple_field2_finish, v1, v2);
-		hook_tuple!(debug_tuple_field3_finish, v1, v2, v3);
-		hook_tuple!(debug_tuple_field4_finish, v1, v2, v3, v4);
-		hook_tuple!(debug_tuple_field5_finish, v1, v2, v3, v4, v5);
-
+		structs();
+		tuples();
 	}
+}
+
+unsafe fn structs() {
+	hook! {
+		hook: for<'b> fn(&'b mut std::fmt::Formatter<'static>, &str) -> std::fmt::DebugStruct<'b, 'static>,
+		std::fmt::Formatter::debug_struct,
+		|fmt, name| {
+			unsafe { hook(fmt, &colored(name, 4)) }
+		}
+	};
+
+	// Something fishy with variance I think, which prevents me from coloring fields
+	// hook! {
+	// 	hook: for<'a> fn(&'a mut std::fmt::DebugStruct<'static, 'static>, &str, &dyn Debug) -> &'a mut std::fmt::DebugTuple<'static, 'static>,
+	// 	std::fmt::DebugStruct::field,
+	// 	|fmt, name, val| {
+	// 		unsafe { hook(fmt, &colored(name, 5), val) }
+	// 	}
+	// };
+
+	// Can't do field_with since it's generic
+
+	macro_rules! hook_struct {
+		($name:ident $(,$a:ident $b:ident)*) => {
+			hook! {
+				func: fn(&mut Formatter<'static>, &str $(, $a: &str, $b: &dyn Debug)*) -> Result,
+				Formatter::$name,
+				|fmt, name $(, $a, $b)*| {
+					unsafe { func(
+						fmt,
+						&colored(name, 4)
+						// $(, &colored($a, 5), $b)*
+						$(, $a, $b)*
+					) }
+				}
+			}
+		}
+	}
+
+
+	hook_struct!(debug_struct_field1_finish, n1 v1);
+	hook_struct!(debug_struct_field2_finish, n1 v1, n2 v2);
+	hook_struct!(debug_struct_field3_finish, n1 v1, n2 v2, n3 v3);
+	hook_struct!(debug_struct_field4_finish, n1 v1, n2 v2, n3 v3, n4 v4);
+	hook_struct!(debug_struct_field5_finish, n1 v1, n2 v2, n3 v3, n4 v4, n5 v5);
+}
+
+unsafe fn tuples() {
+	macro_rules! hook_tuple {
+		($name:ident $(,$a:ident)*) => {
+			hook! {
+				func: fn(&mut Formatter<'static>, &str $(, $a: &dyn Debug)*) -> Result,
+				Formatter::$name,
+				|fmt, name $(, $a)*| {
+					unsafe { func(
+						fmt,
+						&colored(name, 4)
+						$(, $a)*
+					) }
+				}
+			}
+		}
+	}
+
+	hook! {
+		hook: for<'b> fn(&'b mut std::fmt::Formatter<'static>, &str) -> std::fmt::DebugTuple<'b, 'static>,
+		std::fmt::Formatter::debug_tuple,
+		|fmt, name| {
+			unsafe { hook(fmt, &colored(name, 4)) }
+		}
+	};
+
+	hook_tuple!(debug_tuple_field1_finish, v1);
+	hook_tuple!(debug_tuple_field2_finish, v1, v2);
+	hook_tuple!(debug_tuple_field3_finish, v1, v2, v3);
+	hook_tuple!(debug_tuple_field4_finish, v1, v2, v3, v4);
+	hook_tuple!(debug_tuple_field5_finish, v1, v2, v3, v4, v5);
 }
 
 fn color(fmt: &mut Formatter, color: u8) -> Result {
