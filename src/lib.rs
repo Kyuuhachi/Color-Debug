@@ -87,6 +87,12 @@ unsafe fn structs() {
 	hook_struct!(debug_struct_field3_finish, n1 v1, n2 v2, n3 v3);
 	hook_struct!(debug_struct_field4_finish, n1 v1, n2 v2, n3 v3, n4 v4);
 	hook_struct!(debug_struct_field5_finish, n1 v1, n2 v2, n3 v3, n4 v4, n5 v5);
+
+	hook! {
+		hook: for<'b> fn(&'b mut Formatter<'static>, &str, &[&str], &[&dyn Debug]) -> Result,
+		Formatter::debug_struct_fields_finish,
+		|fmt, name, fields, values| unsafe { hook(fmt, &colored(name, 4), fields, values) }
+	};
 }
 
 unsafe fn tuples() {
@@ -111,6 +117,12 @@ unsafe fn tuples() {
 	hook_tuple!(debug_tuple_field3_finish, v1, v2, v3);
 	hook_tuple!(debug_tuple_field4_finish, v1, v2, v3, v4);
 	hook_tuple!(debug_tuple_field5_finish, v1, v2, v3, v4, v5);
+
+	hook! {
+		hook: for<'b> fn(&'b mut Formatter<'static>, &str, &[&dyn Debug]) -> Result,
+		Formatter::debug_tuple_fields_finish,
+		|fmt, name, values| unsafe { hook(fmt, &colored(name, 4), values) }
+	};
 }
 
 fn color(fmt: &mut Formatter, color: u8) -> Result {
