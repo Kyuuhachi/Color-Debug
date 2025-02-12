@@ -52,8 +52,14 @@ pub unsafe fn enable() {
 			}
 		}
 
-		// Unit variants unfortunately use write_str, which I can't hook
+		hook! {
+			hook: for<'a> fn(&'a mut std::fmt::DebugStruct<'static, 'static>, &str, &dyn Debug) -> &'a mut std::fmt::DebugStruct<'static, 'static>,
+			std::fmt::DebugStruct::field,
+			|fmt, name, val| unsafe { hook(fmt, &colored(name, 5), val) }
+		};
 
+		// Coloring struct/tuple names can only be reliably done on nightly, since derived impls have shorthand functions.
+		// Unit variants unfortunately use write_str, which I can't hook.
 		structs();
 		tuples();
 	}
@@ -64,13 +70,6 @@ unsafe fn structs() {
 		hook: for<'b> fn(&'b mut std::fmt::Formatter<'static>, &str) -> std::fmt::DebugStruct<'b, 'static>,
 		std::fmt::Formatter::debug_struct,
 		|fmt, name| unsafe { hook(fmt, &colored(name, 4)) }
-	};
-
-	// Something fishy with variance I think, which prevents me from coloring fields
-	hook! {
-		hook: for<'a> fn(&'a mut std::fmt::DebugStruct<'static, 'static>, &str, &dyn Debug) -> &'a mut std::fmt::DebugStruct<'static, 'static>,
-		std::fmt::DebugStruct::field,
-		|fmt, name, val| unsafe { hook(fmt, &colored(name, 5), val) }
 	};
 
 	macro_rules! hook_struct {
