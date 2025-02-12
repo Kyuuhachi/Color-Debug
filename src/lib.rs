@@ -144,6 +144,7 @@ fn test() {
 	}
 
 	#[derive(Debug)]
+	#[allow(dead_code)]
 	struct Nested {
 		name: String,
 		age: i32,

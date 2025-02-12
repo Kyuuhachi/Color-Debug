@@ -4,10 +4,10 @@ version = "0.1.1"
 edition = "2021"
 description = "Monkey-patches Rust's fmt system to make Debug colored"
 authors = ["Kyuuhachi <caagr98@gmail.com>"]
-# repository = "https://github.com/Kyuuhachi/Compact-Debug"
+repository = "https://github.com/Kyuuhachi/Color-Debug"
 license = "MIT OR Apache-2.0"
 categories = ["development-tools::debugging", "value-formatting"]
 
 [dependencies]
 region = "3.0.0"
-retour = { version = "0.3.1", features = ["static-detour"] }
+retour = "0.3.1"
