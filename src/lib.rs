@@ -17,7 +17,7 @@ macro_rules! hook {
 }
 
 macro_rules! hook_fmt {
-	($color:literal $(,$ty:ty)* $(,)?) => {
+	($color:literal $(,$ty:ty)*) => {
 		$(hook! {
 			func: for<'a, 'b, 'c> fn(&$ty, &'b mut Formatter<'c>) -> Result,
 			<$ty as Debug>::fmt,
@@ -31,12 +31,21 @@ macro_rules! hook_fmt {
 	}
 }
 
+// For integer types, the Debug formatter is inlined awkwardly, so we need to hook references too.
+macro_rules! hook_fmt_ref {
+	($color:literal $(,$ty:ty)*) => {
+		hook_fmt!($color $(,$ty)*);
+		hook_fmt!($color $(,&'static $ty)*);
+		hook_fmt!($color $(,&'static &'static $ty)*);
+	}
+}
+
 /// # Safety
 /// Must only be called once, probably. Really, not sure.
 pub unsafe fn enable() {
 	unsafe {
-		hook_fmt! { 1, u8, u16, u32, u64, u128 };
-		hook_fmt! { 1, i8, i16, i32, i64, i128 };
+		hook_fmt_ref! { 1, u8, u16, u32, u64, u128 };
+		hook_fmt_ref! { 1, i8, i16, i32, i64, i128 };
 		hook_fmt! { 1, f32, f64 };
 		hook_fmt! { 1, bool };
 		hook_fmt! { 2, char, str };
