@@ -1,5 +1,15 @@
 #![cfg_attr(feature = "nightly", feature(fmt_helpers_for_derive))]
 
+//! Monkey-patches `fmt` machinery to colorize debug output.
+//!
+//! # Usage
+//!
+//! ```rust
+//! unsafe { color_debug::enable() };
+//! ```
+//!
+//! This should only be called once. I make no guarantees about what happens if you call it multiple times.
+
 use std::fmt::{Formatter, Result, Debug};
 
 macro_rules! hook {
@@ -40,6 +50,8 @@ macro_rules! hook_fmt_ref {
 	}
 }
 
+/// Enable colored debug output.
+///
 /// # Safety
 /// Must only be called once, probably. Really, not sure.
 pub unsafe fn enable() {
